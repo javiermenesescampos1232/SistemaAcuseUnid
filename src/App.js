@@ -1,49 +1,98 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import jsPDF from 'jspdf'; // Importa jspdf para generar PDFs
 import './App.css';
-import { FaSearch } from 'react-icons/fa'; 
 
 const alumnos = [
   { id: '00738028', nombre: 'Suastegui Hernández Dulce Lisbeth', carrera: 'LIC-ADME-18' },
   { id: '00662244', nombre: 'Tabarez Guillén Jaylin Esmeralda', carrera: 'LIC-ADME-18' },
-  
+  // ... otros estudiantes
+];
+
+const documentosOpciones = [
+  { id: 'Acta Nacimiento', label: 'Acta Nacimiento' },
+  { id: 'Curp', label: 'Curp' },
+  { id: 'certificado Prepa', label: 'certificado Prepa' },
+  { id: 'Comprobante de domicilio', label: 'Comprobante de domicilio' },
+  { id: 'Comprobante de pago de inscripción', label: 'Comprobante de pago de inscripción' },
+  { id: 'Fotografías', label: 'Fotografías:' },
 ];
 
 const App = () => {
-  const [documentos, setDocumentos] = useState([]);
-  const [busqueda, setBusqueda] = useState('');
-  const [alumnoSeleccionado, setAlumnoSeleccionado] = useState(null);
-  const [showSearch, setShowSearch] = useState(false);
+  const [alumnoSeleccionado, setAlumnoSeleccionado] = useState(alumnos[0]);
+  const [documentosSeleccionados, setDocumentosSeleccionados] = useState([]);
+  const [mostrarDocumentos, setMostrarDocumentos] = useState(false); // Estado para controlar la visibilidad de la lista de documentos
 
-  const handleSearch = (e) => {
-    setBusqueda(e.target.value);
-    const alumno = alumnos.find(a => a.id === e.target.value);
-    if (alumno) {
-      setAlumnoSeleccionado(alumno);
-    }
-  };
-
-  const handleAddDocumento = () => {
-    const documentoSeleccionado = document.getElementById('documentoEntregado').value;
-    if (documentoSeleccionado && !documentos.includes(documentoSeleccionado)) {
-      setDocumentos([...documentos, documentoSeleccionado]);
-    }
-  };
-
-  const handleRemoveDocumento = (index) => {
-    const newDocumentos = [...documentos];
-    newDocumentos.splice(index, 1);
-    setDocumentos(newDocumentos);
-  };
-
-  const handleSearchSubmit = (e) => {
-    e.preventDefault();
-    const alumno = alumnos.find(a => a.id === busqueda);
-    if (alumno) {
-      setAlumnoSeleccionado(alumno);
+  const handleCheckboxChange = (event) => {
+    const { value, checked } = event.target;
+    if (checked && !documentosSeleccionados.includes(value)) {
+      setDocumentosSeleccionados([...documentosSeleccionados, value]);
     } else {
-      setAlumnoSeleccionado(null);
+      const newDocumentosSeleccionados = documentosSeleccionados.filter(doc => doc !== value);
+      setDocumentosSeleccionados(newDocumentosSeleccionados);
     }
+  };
+
+  const handleNombreChange = (e) => {
+    setAlumnoSeleccionado({ ...alumnoSeleccionado, nombre: e.target.value });
+  };
+
+  const handleIdChange = (e) => {
+    setAlumnoSeleccionado({ ...alumnoSeleccionado, id: e.target.value });
+  };
+
+  const handleCarreraChange = (e) => {
+    setAlumnoSeleccionado({ ...alumnoSeleccionado, carrera: e.target.value });
+  };
+
+  const toggleMostrarDocumentos = () => {
+    setMostrarDocumentos(!mostrarDocumentos);
+  };
+
+  const generarAcusePDF = () => {
+    const fecha = new Date().toISOString().split('T')[0];
+    const { nombre, id, carrera } = alumnoSeleccionado;
+    const documento = documentosSeleccionados.map(doc => documentosOpciones.find(opcion => opcion.id === doc).label).join(', ');
+
+    const acuseTemplate = `
+      Campus: Acapulco
+      ACUSE DE RECEPCIÓN DE DOCUMENTOS
+      Nombre del Estudiante: ${nombre} ID: ${id}
+      Programa: ${carrera} Fecha: ${fecha}
+      Se hace constar que el estudiante hace entrega de los siguientes documentos:
+      - ${documento}
+      * Bajo protesta de decir verdad, el estudiante manifiesta que los documentos originales entregados, son auténticos; en caso contrario, deslinda de toda
+      responsabilidad a la Universidad Interamericana para el Desarrollo (UNID) y acepta que se hará acreedor a las sanciones que el Reglamento General de
+      Estudiantes del Sistema UNID vigente establece, así como a las leyes correspondientes del país.
+      * El estudiante se da por enterado de que la documentación original entregada, quedará bajo resguardo en la Coordinación de Servicios Escolares durante el
+      tiempo que dure la carrera elegida y durante el proceso de titulación y le será regresada cuando finalicen dichos trámites.
+      Firma de Alumno(a) Firma del Coordinador de Servicios Escolares
+      Para el estudiante
+      \n\n
+      Campus: Acapulco
+      ACUSE DE RECEPCIÓN DE DOCUMENTOS
+      Nombre del Estudiante: ${nombre} ID: ${id}
+      Programa: ${carrera} Fecha: ${fecha}
+      Se hace constar que el estudiante hace entrega de los siguientes documentos:
+      - ${documento}
+      * Bajo protesta de decir verdad, el estudiante manifiesta que los documentos originales entregados, son auténticos; en caso contrario, deslinda de toda
+      responsabilidad a la Universidad Interamericana para el Desarrollo (UNID) y acepta que se hará acreedor a las sanciones que el Reglamento General de
+      Estudiantes del Sistema UNID vigente establece, así como a las leyes correspondientes del país.
+      * El estudiante se da por enterado de que la documentación original entregada, quedará bajo resguardo en la Coordinación de Servicios Escolares durante el
+      tiempo que dure la carrera elegida y durante el proceso de titulación y le será regresada cuando finalicen dichos trámites.
+      Firma de Alumno(a) Firma del Coordinador de Servicios Escolares
+      Para el Campus
+    `;
+
+    // Configuración de PDF
+    const doc = new jsPDF();
+    const splitText = doc.splitTextToSize(acuseTemplate, 180);
+    doc.text(splitText, 10, 10);
+
+    // Descarga del PDF
+    doc.save('acuse_documento.pdf');
   };
 
   return (
@@ -52,29 +101,7 @@ const App = () => {
         <div className="container-fluid bg-light py-3">
           <div className="container">
             <div className="d-flex align-items-center justify-content-between">
-              <div className="d-flex align-items-center">
-                <h1 className="ms-3 mb-0">Sistema de Acuse Documentos</h1>
-              </div>
-              <div className="search-container">
-                <FaSearch
-                  className="search-icon"
-                  onClick={() => setShowSearch(!showSearch)}
-                  style={{ cursor: 'pointer', fontSize: '1.5em' }}
-                />
-                {showSearch && (
-                  <form onSubmit={handleSearchSubmit} className="search-form">
-                    <input 
-                      type="text" 
-                      className="form-control" 
-                      id="searchInput" 
-                      placeholder="Buscar ID de Estudiante..." 
-                      value={busqueda}
-                      onChange={handleSearch} 
-                    />
-                    <button type="submit" className="btn btn-primary mt-2" id="searchSubmit">Buscar</button>
-                  </form>
-                )}
-              </div>
+              <h1 className="ms-3 mb-0">Sistema de Acuse Documentos</h1>
             </div>
           </div>
         </div>
@@ -90,8 +117,8 @@ const App = () => {
                   type="text" 
                   id="nombreAlumno" 
                   className="form-control" 
-                  value={alumnoSeleccionado ? alumnoSeleccionado.nombre : ''} 
-                  readOnly 
+                  value={alumnoSeleccionado.nombre} 
+                  onChange={handleNombreChange} 
                   required 
                 />
               </div>
@@ -101,8 +128,8 @@ const App = () => {
                   type="text" 
                   id="idAlumno" 
                   className="form-control" 
-                  value={alumnoSeleccionado ? alumnoSeleccionado.id : ''} 
-                  readOnly 
+                  value={alumnoSeleccionado.id} 
+                  onChange={handleIdChange} 
                   required 
                 />
               </div>
@@ -112,53 +139,32 @@ const App = () => {
                   type="text" 
                   id="carreraAlumno" 
                   className="form-control" 
-                  value={alumnoSeleccionado ? alumnoSeleccionado.carrera : ''} 
-                  readOnly 
+                  value={alumnoSeleccionado.carrera} 
+                  onChange={handleCarreraChange} 
                   required 
                 />
               </div>
               <div className="form-group mb-3">
-                <label htmlFor="documentoEntregado" className="form-label">Documento Entregado:</label>
-                <select id="documentoEntregado" className="form-control" required>
-                  <option value="" disabled selected>Selecciona un documento</option>
-                  <option value="certificado_estudios">Certificado de Estudios</option>
-                  <option value="boleta_calificaciones">Boleta de Calificaciones</option>
-                  <option value="titulo_universitario">Título Universitario</option>
-                  <option value="diploma_especialidad">Diploma de Especialidad</option>
-                  <option value="constancia_inscripcion">Constancia de Inscripción</option>
-                  <option value="constancia_estudios">Constancia de Estudios</option>
-                  <option value="carta_buena_conducta">Carta de Buena Conducta</option>
-                  <option value="kardex">Kardex</option>
-                  <option value="constancia_no_adeudo">Constancia de No Adeudo</option>
-                  <option value="certificado_servicio_social">Certificado de Servicio Social</option>
-                  <option value="carta_pasante">Carta de Pasante</option>
-                  <option value="constancia_practicas_profesionales">Constancia de Prácticas Profesionales</option>
-                  <option value="constancia_actividades_complementarias">Constancia de Actividades Complementarias</option>
-                  <option value="certificado_medico">Certificado Médico</option>
-                  <option value="comprobante_pago_inscripcion">Comprobante de Pago de Inscripción</option>
-                  <option value="comprobante_pago_colegiatura">Comprobante de Pago de Colegiatura</option>
-                  <option value="carta_liberacion_servicio_social">Carta de Liberación de Servicio Social</option>
-                  <option value="carta_recomendacion">Carta de Recomendación</option>
-                  <option value="carta_presentacion_practicas_profesionales">Carta de Presentación para Prácticas Profesionales</option>
-                  <option value="acta_examen_profesional">Acta de Examen Profesional</option>
-                </select>
-                <button type="button" id="addDocumento" className="btn btn-secondary mt-3" onClick={handleAddDocumento}>Agregar Documento</button>
+                <label htmlFor="documentoEntregado" className="form-label">Documentos Entregados:</label>
+                <div>
+                  <button type="button" className="btn btn-secondary mb-2" onClick={toggleMostrarDocumentos}>
+                    {mostrarDocumentos ? 'Ocultar Documentos' : 'Mostrar Documentos'}
+                  </button>
+                </div>
+                {mostrarDocumentos && (
+                  <ul className="list-group documentos-lista">
+                    {documentosOpciones.map(doc => (
+                      <li key={doc.id} className="list-group-item">
+                        <FormControlLabel
+                          control={<Checkbox onChange={handleCheckboxChange} value={doc.id} />}
+                          label={doc.label}
+                        />
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-              <ul id="documentosSeleccionados" className="list-group mb-3">
-                {documentos.map((doc, index) => (
-                  <li key={index} className="list-group-item d-flex justify-content-between align-items-center">
-                    {doc}
-                    <span 
-                      className="badge bg-success rounded-pill" 
-                      style={{ cursor: 'pointer' }} 
-                      onClick={() => handleRemoveDocumento(index)}
-                    >
-                      ✔
-                    </span>
-                  </li>
-                ))}
-              </ul>
-              <button type="submit" className="btn btn-primary">Enviar</button>
+              <button type="button" className="btn btn-primary" onClick={generarAcusePDF}>GENERAR ACUSE</button>
             </form>
           </div>
         </div>
@@ -166,10 +172,9 @@ const App = () => {
         <div className="row justify-content-center mt-5">
           <div className="col-lg-8">
             <div id="comprobantes" className="bg-white p-4 rounded shadow-sm">
-              <h2 className="mb-4">Comprobantes para coordinacion académica</h2>
+              <h2 className="mb-4">Comprobantes para coordinación académica</h2>
               <div id="comprobanteAlumno"></div>
               <div id="comprobantePersonal"></div>
-              <button id="generarPdf" className="btn btn-primary mt-3">DESCARGAR PDF</button>
             </div>
           </div>
         </div>
