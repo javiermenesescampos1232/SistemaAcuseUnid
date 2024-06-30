@@ -12,12 +12,12 @@ const alumnos = [
 ];
 
 const documentosOpciones = [
-  { id: 'Acta Nacimiento', label: 'Acta Nacimiento' },
-  { id: 'Curp', label: 'Curp' },
-  { id: 'certificado Prepa', label: 'certificado Prepa' },
-  { id: 'Comprobante de domicilio', label: 'Comprobante de domicilio' },
-  { id: 'Comprobante de pago de inscripción', label: 'Comprobante de pago de inscripción' },
-  { id: 'Fotografías', label: 'Fotografías:' },
+  { id: 'ACTA NACIMIENTO', label: 'ACTA NACIMIENTO' },
+  { id: 'CURP', label: 'CURP' },
+  { id: 'CERTIFICADO PREPA', label: 'CERTIFICADO PREPA' },
+  { id: 'COMPROBANTE DOMICILIO', label: 'COMPROBANTE DOMICILIO' },
+  { id: 'COMPROBANTE INSCRIPCION', label: 'COMPROBANTE INSCRIPCION' },
+  { id: 'FOTOGRAFIAS', label: 'FOTOGRAFIAS' },
 ];
 
 const App = () => {
