@@ -86,12 +86,12 @@ const App = () => {
       Para el Campus
     `;
 
-    // Configuración de PDF
+  
     const doc = new jsPDF();
     const splitText = doc.splitTextToSize(acuseTemplate, 180);
     doc.text(splitText, 10, 10);
 
-    // Descarga del PDF
+    // Descarga del PDFS
     doc.save('acuse_documento.pdf');
   };
 
