@@ -77,8 +77,7 @@ const App = () => {
       Estudiantes del Sistema UNID vigente establece, así como a las leyes correspondientes del país.
       * El estudiante se da por enterado de que la documentación original entregada, quedará bajo resguardo en la Coordinación de Servicios Escolares durante el
       tiempo que dure la carrera elegida y durante el proceso de titulación y le será regresada cuando finalicen dichos trámites.
-      Firma de Alumno(a): ___________________________
-      Firma del Coordinador de Servicios Escolares: ___________________________
+      Firma de Alumno(a): ___________________________  Firma del Coordinador de Servicios Escolares: ___________________________
       Para el estudiante
     `;
 
