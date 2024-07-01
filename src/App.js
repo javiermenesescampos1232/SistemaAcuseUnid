@@ -2,13 +2,14 @@ import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Checkbox from '@mui/material/Checkbox';
 import FormControlLabel from '@mui/material/FormControlLabel';
-import jsPDF from 'jspdf'; // Importa jspdf para generar PDFs
+import jsPDF from 'jspdf';
 import './App.css';
+import logo from './img/descarga.png';
 
 const alumnos = [
   { id: '00738028', nombre: 'Suastegui Hernández Dulce Lisbeth', carrera: 'LIC-ADME-18' },
   { id: '00662244', nombre: 'Tabarez Guillén Jaylin Esmeralda', carrera: 'LIC-ADME-18' },
-  // ... otros estudiantes
+
 ];
 
 const documentosOpciones = [
@@ -20,10 +21,18 @@ const documentosOpciones = [
   { id: 'FOTOGRAFIAS', label: 'FOTOGRAFIAS' },
 ];
 
+const carrerasOpciones = [
+  'ADMINISTRACION DE EMPRESAS',
+  'COMUNICACION',
+  'DISEÑO GRAFICO DIGITAL',
+  'INGENIERIA DE SOFTWARE Y SISTEMAS COMPUTACIONALES',
+  'DERECHOS Y CIENCIAS JURIDICAS'
+];
+
 const App = () => {
   const [alumnoSeleccionado, setAlumnoSeleccionado] = useState(alumnos[0]);
   const [documentosSeleccionados, setDocumentosSeleccionados] = useState([]);
-  const [mostrarDocumentos, setMostrarDocumentos] = useState(false); // Estado para controlar la visibilidad de la lista de documentos
+  const [mostrarDocumentos, setMostrarDocumentos] = useState(false);
 
   const handleCheckboxChange = (event) => {
     const { value, checked } = event.target;
@@ -68,30 +77,32 @@ const App = () => {
       Estudiantes del Sistema UNID vigente establece, así como a las leyes correspondientes del país.
       * El estudiante se da por enterado de que la documentación original entregada, quedará bajo resguardo en la Coordinación de Servicios Escolares durante el
       tiempo que dure la carrera elegida y durante el proceso de titulación y le será regresada cuando finalicen dichos trámites.
-      Firma de Alumno(a) Firma del Coordinador de Servicios Escolares
+      Firma de Alumno(a): ___________________________
+      Firma del Coordinador de Servicios Escolares: ___________________________
       Para el estudiante
-      \n\n
-      Campus: Acapulco
-      ACUSE DE RECEPCIÓN DE DOCUMENTOS
-      Nombre del Estudiante: ${nombre} ID: ${id}
-      Programa: ${carrera} Fecha: ${fecha}
-      Se hace constar que el estudiante hace entrega de los siguientes documentos:
-      - ${documento}
-      * Bajo protesta de decir verdad, el estudiante manifiesta que los documentos originales entregados, son auténticos; en caso contrario, deslinda de toda
-      responsabilidad a la Universidad Interamericana para el Desarrollo (UNID) y acepta que se hará acreedor a las sanciones que el Reglamento General de
-      Estudiantes del Sistema UNID vigente establece, así como a las leyes correspondientes del país.
-      * El estudiante se da por enterado de que la documentación original entregada, quedará bajo resguardo en la Coordinación de Servicios Escolares durante el
-      tiempo que dure la carrera elegida y durante el proceso de titulación y le será regresada cuando finalicen dichos trámites.
-      Firma de Alumno(a) Firma del Coordinador de Servicios Escolares
-      Para el Campus
     `;
 
-  
     const doc = new jsPDF();
     const splitText = doc.splitTextToSize(acuseTemplate, 180);
-    doc.text(splitText, 10, 10);
 
-    // Descarga del PDFS
+    
+    const imgData = logo;
+    doc.addImage(imgData, 'PNG', 10, 10, 50, 20);
+
+    
+    doc.setFontSize(10);
+    doc.setFont('times');
+    doc.setTextColor(0, 0, 0);
+
+    
+    splitText.forEach((line, index) => {
+      doc.text(line, 10, 40 + (index * 5), { align: 'justify' });
+    });
+
+    
+    doc.text('___________________________', 10, 120); 
+    doc.text('___________________________', 10, 140); 
+    
     doc.save('acuse_documento.pdf');
   };
 
@@ -135,42 +146,51 @@ const App = () => {
               </div>
               <div className="mb-3">
                 <label htmlFor="carreraAlumno" className="form-label">Carrera:</label>
-                <input 
-                  type="text" 
+                <select 
                   id="carreraAlumno" 
                   className="form-control" 
                   value={alumnoSeleccionado.carrera} 
-                  onChange={handleCarreraChange} 
-                  required 
-                />
+                  onChange={handleCarreraChange}
+                  required
+                >
+                  <option value="">Seleccione una carrera</option>
+                  {carrerasOpciones.map((carrera, index) => (
+                    <option key={index} value={carrera}>{carrera}</option>
+                  ))}
+                </select>
               </div>
               <div className="form-group mb-3">
                 <label htmlFor="documentoEntregado" className="form-label">Documentos Entregados:</label>
                 <div>
-                  <button type="button" className="btn btn-secondary mb-2" onClick={toggleMostrarDocumentos}>
+                  <button type="button" className="btn btn-primary mb-3" onClick={toggleMostrarDocumentos}>
                     {mostrarDocumentos ? 'Ocultar Documentos' : 'Mostrar Documentos'}
                   </button>
-                </div>
-                {mostrarDocumentos && (
-                  <ul className="list-group documentos-lista">
-                    {documentosOpciones.map(doc => (
-                      <li key={doc.id} className="list-group-item">
+                  {mostrarDocumentos && (
+                    <div className="form-group">
+                      {documentosOpciones.map((documento) => (
                         <FormControlLabel
-                          control={<Checkbox onChange={handleCheckboxChange} value={doc.id} />}
-                          label={doc.label}
+                          key={documento.id}
+                          control={
+                            <Checkbox
+                              value={documento.id}
+                              checked={documentosSeleccionados.includes(documento.id)}
+                              onChange={handleCheckboxChange}
+                            />
+                          }
+                          label={documento.label}
                         />
-                      </li>
-                    ))}
-                  </ul>
-                )}
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
-              <button type="button" className="btn btn-primary" onClick={generarAcusePDF}>GENERAR ACUSE</button>
+              <div className="text-center">
+                <button type="button" className="btn btn-success" onClick={generarAcusePDF}>
+                  Generar Acuse
+                </button>
+              </div>
             </form>
-          </div>
-        </div>
-
-        <div className="row justify-content-center mt-5">
-          <div className="col-lg-8">
+            
             <div id="comprobantes" className="bg-white p-4 rounded shadow-sm">
               <h2 className="mb-4">Comprobantes para coordinación académica</h2>
               <div id="comprobanteAlumno"></div>
