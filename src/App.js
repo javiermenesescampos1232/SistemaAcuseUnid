@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Checkbox from '@mui/material/Checkbox';
-import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';  // Importamos Checkbox desde @mui/material
+import FormControlLabel from '@mui/material/FormControlLabel';  // Importamos FormControlLabel desde @mui/material
 import jsPDF from 'jspdf';
 import './App.css';
 import logo from './img/descarga.png';
@@ -9,16 +9,13 @@ import logo from './img/descarga.png';
 const alumnos = [
   { id: '00738028', nombre: 'Suastegui Hernández Dulce Lisbeth', carrera: 'LIC-ADME-18' },
   { id: '00662244', nombre: 'Tabarez Guillén Jaylin Esmeralda', carrera: 'LIC-ADME-18' },
-
+  // Más alumnos aquí
 ];
 
 const documentosOpciones = [
   { id: 'ACTA NACIMIENTO', label: 'ACTA NACIMIENTO' },
   { id: 'CURP', label: 'CURP' },
-  { id: 'CERTIFICADO PREPA', label: 'CERTIFICADO PREPA' },
-  { id: 'COMPROBANTE DOMICILIO', label: 'COMPROBANTE DOMICILIO' },
-  { id: 'COMPROBANTE INSCRIPCION', label: 'COMPROBANTE INSCRIPCION' },
-  { id: 'FOTOGRAFIAS', label: 'FOTOGRAFIAS' },
+  // Más opciones de documentos aquí
 ];
 
 const carrerasOpciones = [
@@ -33,6 +30,9 @@ const App = () => {
   const [alumnoSeleccionado, setAlumnoSeleccionado] = useState(alumnos[0]);
   const [documentosSeleccionados, setDocumentosSeleccionados] = useState([]);
   const [mostrarDocumentos, setMostrarDocumentos] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
 
   const handleCheckboxChange = (event) => {
     const { value, checked } = event.target;
@@ -60,6 +60,22 @@ const App = () => {
     setMostrarDocumentos(!mostrarDocumentos);
   };
 
+  const handleLogin = () => {
+    
+    if (username === '00742731' && password === '123456') {
+      setLoggedIn(true);
+    } else if (username === '00647166' && password === '123456') {
+      setLoggedIn(true);
+    } else {
+      alert('Credenciales incorrectas. Por favor, intenta de nuevo.');
+    }
+  };
+ 
+  const handleLogout = () => {
+    // Simular cierre de sesión
+    setLoggedIn(false);
+  };
+
   const generarAcusePDF = () => {
     const fecha = new Date().toISOString().split('T')[0];
     const { nombre, id, carrera } = alumnoSeleccionado;
@@ -84,26 +100,63 @@ const App = () => {
     const doc = new jsPDF();
     const splitText = doc.splitTextToSize(acuseTemplate, 180);
 
-    
     const imgData = logo;
     doc.addImage(imgData, 'PNG', 10, 10, 50, 20);
 
-    
     doc.setFontSize(10);
     doc.setFont('times');
     doc.setTextColor(0, 0, 0);
 
-    
     splitText.forEach((line, index) => {
       doc.text(line, 10, 40 + (index * 5), { align: 'justify' });
     });
 
-    
     doc.text('___________________________', 10, 120); 
     doc.text('___________________________', 10, 140); 
     
     doc.save('acuse_documento.pdf');
   };
+
+  if (!loggedIn) {
+    return (
+      <div className="container mt-5">
+        <div className="row justify-content-center">
+          <div className="col-lg-6">
+            <form className="bg-white p-4 rounded shadow-sm">
+              <h2 className="mb-4">Iniciar Sesión</h2>
+              <div className="mb-3">
+                <label htmlFor="username" className="form-label">Usuario (ID):</label>
+                <input 
+                  type="text" 
+                  id="username" 
+                  className="form-control" 
+                  value={username} 
+                  onChange={(e) => setUsername(e.target.value)} 
+                  required 
+                />
+              </div>
+              <div className="mb-3">
+                <label htmlFor="password" className="form-label">Contraseña:</label>
+                <input 
+                  type="password" 
+                  id="password" 
+                  className="form-control" 
+                  value={password} 
+                  onChange={(e) => setPassword(e.target.value)} 
+                  required 
+                />
+              </div>
+              <div className="text-center">
+                <button type="button" className="btn btn-primary" onClick={handleLogin}>
+                  Iniciar Sesión
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -112,6 +165,9 @@ const App = () => {
           <div className="container">
             <div className="d-flex align-items-center justify-content-between">
               <h1 className="ms-3 mb-0">Sistema de Acuse Documentos</h1>
+              <button type="button" className="btn btn-danger" onClick={handleLogout}>
+                Cerrar Sesión
+              </button>
             </div>
           </div>
         </div>
@@ -165,19 +221,17 @@ const App = () => {
                     {mostrarDocumentos ? 'Ocultar Documentos' : 'Mostrar Documentos'}
                   </button>
                   {mostrarDocumentos && (
-                    <div className="form-group">
-                      {documentosOpciones.map((documento) => (
-                        <FormControlLabel
-                          key={documento.id}
-                          control={
-                            <Checkbox
-                              value={documento.id}
-                              checked={documentosSeleccionados.includes(documento.id)}
-                              onChange={handleCheckboxChange}
-                            />
-                          }
-                          label={documento.label}
-                        />
+                    <div>
+                      {documentosOpciones.map((opcion) => (
+                        <div key={opcion.id} className="form-check">
+                          <FormControlLabel
+                            control={<Checkbox />}
+                            label={opcion.label}
+                            value={opcion.id}
+                            checked={documentosSeleccionados.includes(opcion.id)}
+                            onChange={handleCheckboxChange}
+                          />
+                        </div>
                       ))}
                     </div>
                   )}
@@ -185,16 +239,10 @@ const App = () => {
               </div>
               <div className="text-center">
                 <button type="button" className="btn btn-success" onClick={generarAcusePDF}>
-                  Generar Acuse
+                  Generar Acuse de Recibo
                 </button>
               </div>
             </form>
-            
-            <div id="comprobantes" className="bg-white p-4 rounded shadow-sm">
-              <h2 className="mb-4">Comprobantes para coordinación académica</h2>
-              <div id="comprobanteAlumno"></div>
-              <div id="comprobantePersonal"></div>
-            </div>
           </div>
         </div>
       </div>
