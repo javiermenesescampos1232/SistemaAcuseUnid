@@ -9,13 +9,13 @@ import logo from './img/descarga.png';
 const alumnos = [
   { id: '00738028', nombre: 'Suastegui Hernández Dulce Lisbeth', carrera: 'LIC-ADME-18' },
   { id: '00662244', nombre: 'Tabarez Guillén Jaylin Esmeralda', carrera: 'LIC-ADME-18' },
-  // Más alumnos aquí
+  
 ];
 
 const documentosOpciones = [
   { id: 'ACTA NACIMIENTO', label: 'ACTA NACIMIENTO' },
   { id: 'CURP', label: 'CURP' },
-  // Más opciones de documentos aquí
+  
 ];
 
 const carrerasOpciones = [
@@ -72,7 +72,6 @@ const App = () => {
   };
  
   const handleLogout = () => {
-    // Simular cierre de sesión
     setLoggedIn(false);
   };
 
