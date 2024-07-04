@@ -1,21 +1,10 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
-import StudentVerificationForm from './StudentVerificationForm';
+import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.js'
+import './index.css'
 
-
-
-
-ReactDOM.render(
+ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
-    <div>
-      <App />
-      <StudentVerificationForm /> 
-    </div>
+    <App />
   </React.StrictMode>,
-  document.getElementById('root')
-);
-
-reportWebVitals();
+)
