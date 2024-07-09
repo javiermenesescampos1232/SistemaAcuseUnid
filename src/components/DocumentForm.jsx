@@ -1,40 +1,28 @@
-// components/DocumentForm.js
 import React, { useState } from 'react';
 import Checkbox from '@mui/material/Checkbox';  
 import FormControlLabel from '@mui/material/FormControlLabel'; 
 import jsPDF from 'jspdf';
 import logo from '../img/descarga.png';
-import LoginForm from './LoginForm';
-
-
 
 const DocumentForm = () => {
-
-      
-const alumnos = [
+  const alumnos = [
     { id: '00738028', nombre: 'Suastegui Hernández Dulce Lisbeth', carrera: 'LIC-ADME-18' },
     { id: '00662244', nombre: 'Tabarez Guillén Jaylin Esmeralda', carrera: 'LIC-ADME-18' },
-    
   ];
-  
+
   const documentosOpciones = [
     { id: 'ACTA NACIMIENTO', label: 'ACTA NACIMIENTO' },
     { id: 'CURP', label: 'CURP' },
     { id: 'CERTIFICADO PREPA', label: 'CERTIFICADO PREPA' },
     { id: 'COMPROBANTE DOMICILIO', label: 'COMPROBANTE DOMICILIO' },
     { id: 'COMPROBANTE INSCRIPCION', label: 'COMPROBANTE INSCRIPCION' },
-    { id: 'FOTOGRAFIAS', label: 'FOTOGRAFIAS' },
+    { id: 'FOTOGRAFIAS', label: 'FOTOGRAFIAS' },
   ];
 
   const [alumnoSeleccionado, setAlumnoSeleccionado] = useState(alumnos[0]);
   const [documentosSeleccionados, setDocumentosSeleccionados] = useState([]);
   const [mostrarDocumentos, setMostrarDocumentos] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
 
-
-  
   const carrerasOpciones = [
     'ADMINISTRACION DE EMPRESAS',
     'COMUNICACION',
@@ -69,33 +57,31 @@ const alumnos = [
     setMostrarDocumentos(!mostrarDocumentos);
   };
 
-  
   const handleLogout = () => {
     localStorage.removeItem("username");
-    localStorage.removeItem("password")
-
-    window.location.href ="/"
+    localStorage.removeItem("password");
+    window.location.href = "/";
   };
 
   const generarAcusePDF = () => {
     const fecha = new Date().toISOString().split('T')[0];
     const { nombre, id, carrera } = alumnoSeleccionado;
-    const documento = documentosSeleccionados.map(doc => documentosOpciones.find(opcion => opcion.id === doc).label).join(', ');
+    const documentosEnLista = documentosSeleccionados.map(doc => documentosOpciones.find(opcion => opcion.id === doc).label);
 
     const acuseTemplate = `
       Campus: Acapulco
       ACUSE DE RECEPCIÓN DE DOCUMENTOS
       Nombre del Estudiante: ${nombre} ID: ${id}
-      Programa: ${carrera} Fecha: ${fecha}
+      Programa: ${carrera}
+      
       Se hace constar que el estudiante hace entrega de los siguientes documentos:
-      - ${documento}
+      ${documentosEnLista.map(doc => `- ${doc}`).join('\n')}
+      
       * Bajo protesta de decir verdad, el estudiante manifiesta que los documentos originales entregados, son auténticos; en caso contrario, deslinda de toda
       responsabilidad a la Universidad Interamericana para el Desarrollo (UNID) y acepta que se hará acreedor a las sanciones que el Reglamento General de
       Estudiantes del Sistema UNID vigente establece, así como a las leyes correspondientes del país.
       * El estudiante se da por enterado de que la documentación original entregada, quedará bajo resguardo en la Coordinación de Servicios Escolares durante el
       tiempo que dure la carrera elegida y durante el proceso de titulación y le será regresada cuando finalicen dichos trámites.
-      Firma de Alumno(a): ___________________________  Firma del Coordinador de Servicios Escolares: ___________________________
-      Para el estudiante
     `;
 
     const doc = new jsPDF();
@@ -108,17 +94,19 @@ const alumnos = [
     doc.setFont('times');
     doc.setTextColor(0, 0, 0);
 
+    doc.text(fecha, 200, 10, { align: 'right' });
+
     splitText.forEach((line, index) => {
       doc.text(line, 10, 40 + (index * 5), { align: 'justify' });
     });
 
-    doc.text('___________________________', 10, 120); 
-    doc.text('___________________________', 10, 140); 
-    
+    doc.text('Firma de Alumno(a):', 10, 200);
+    doc.text('___________________________', 10, 210);
+    doc.text('Firma del Coordinador de Servicios Escolares:', 100, 200);
+    doc.text('___________________________', 100, 210);
+
     doc.save('acuse_documento.pdf');
   };
-  
-
 
   return (
     <div>

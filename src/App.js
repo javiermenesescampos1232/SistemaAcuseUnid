@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import Checkbox from '@mui/material/Checkbox';  // Importamos Checkbox desde @mui/material
-import FormControlLabel from '@mui/material/FormControlLabel';  // Importamos FormControlLabel desde @mui/material
+import Checkbox from '@mui/material/Checkbox'; 
+import FormControlLabel from '@mui/material/FormControlLabel'; 
 import jsPDF from 'jspdf';
 import './App.css';
 import LoginForm from './components/LoginForm';
